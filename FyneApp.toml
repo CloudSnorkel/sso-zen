@@ -1,0 +1,14 @@
+Website = "https://github.com/CloudSnorkel/sso-zen"
+
+[Details]
+Icon = "assets/256x256.png"
+Name = "SSO Zen"
+ID = "com.cloudsnorkel.ssozen"
+Version = "0.0.0"
+Build = 1
+
+[LinuxAndBSD]
+GenericName = "SSO Zen"
+Categories = ["Development"]
+Comment = "Monitor local SSO sessions expiration"
+Keywords = ["sso", "automatic", "aws"]

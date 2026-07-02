@@ -1,0 +1,32 @@
+name: Require Label
+
+# Release notes (.github/release.yml) group merged PRs by label. This gate
+# makes sure every PR carries a categorizing label so nothing silently falls
+# into "Other Changes". Re-runs on label changes, so adding one clears it.
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, labeled, unlabeled]
+
+permissions:
+  contents: read
+
+jobs:
+  require-label:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check for a changelog label
+      run: |
+        allowed="enhancement feature bug bugfix fix ci build dependencies"
+        labels=$(jq -r '.pull_request.labels[].name' "$GITHUB_EVENT_PATH")
+        echo "PR labels: ${labels:-(none)}"
+        for l in $labels; do
+          for a in $allowed; do
+            if [ "$l" = "$a" ]; then
+              echo "Found categorizing label: $l"
+              exit 0
+            fi
+          done
+        done
+        echo "::error::This PR needs at least one changelog label so release notes categorize it: ${allowed// /, }"
+        exit 1

@@ -1,0 +1,75 @@
+# Go build artifacts
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+__debug_bin*
+
+# Go workspace file
+go.work
+
+# Go test coverage
+*.cover
+*.coverprofile
+coverage.txt
+coverage.html
+
+# Go profiling
+*.prof
+*.pprof
+
+# Go vendor directory
+vendor/
+
+# Go build cache
+.cache/
+
+# IDE files
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Windows
+*.lnk
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build outputs
+dist/
+build/
+bin/
+obj/
+
+# Test results
+test-results/
+coverage/

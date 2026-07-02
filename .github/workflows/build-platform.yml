@@ -1,0 +1,134 @@
+name: Build Platform
+
+on:
+  workflow_call:
+    inputs:
+      platform:
+        required: true
+        type: string
+        description: 'Platform to build for (windows, linux, darwin)'
+      version:
+        required: false
+        type: string
+        description: 'Version string for the build'
+      release:
+        required: false
+        type: boolean
+        description: 'Whether to build a release package'
+        default: false
+    outputs:
+      artifact-path:
+        description: 'Path to the built artifact'
+        value: ${{ jobs.build.outputs.artifact-path }}
+
+jobs:
+  build:
+    runs-on: ${{ inputs.platform == 'windows' && 'windows-latest' || (inputs.platform == 'linux' && 'ubuntu-latest' || 'macos-latest') }}
+    outputs:
+      artifact-path: ${{ steps.artifact.outputs.artifact-path }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v7
+      with:
+        fetch-depth: ${{ inputs.release && 0 || 1 }}
+
+    - name: Set up Go
+      uses: actions/setup-go@v6
+      with:
+        go-version-file: go.mod
+
+    - name: Install dependencies
+      run: go mod download
+
+    - name: Install system dependencies (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libgl1-mesa-dev xorg-dev gcc libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libglfw3-dev libxcursor-dev
+
+    - name: Extract or set version
+      id: version
+      shell: bash
+      run: |
+        if [ -n "${{ inputs.version }}" ]; then
+          VERSION="${{ inputs.version }}"
+          # Strip 'v' prefix if present
+          VERSION="${VERSION#v}"
+        else
+          # Use 0.0.0 as default version for fyne
+          VERSION="0.0.0"
+        fi
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "Version: $VERSION"
+
+    - name: Build package
+      shell: bash
+      env:
+        CGO_ENABLED: 1
+        MACOSX_DEPLOYMENT_TARGET: ${{ inputs.platform == 'darwin' && '10.14' || '' }}
+      run: |
+        go tool fyne package \
+          -os ${{ inputs.platform }} \
+          --app-version "${{ steps.version.outputs.version }}" \
+          ${{ inputs.release && '-release' || '' }}
+
+    - name: Prepare artifact
+      id: artifact
+      shell: bash
+      # Single-file output per platform, named sso-zen-<platform>-<v>.<ext>.
+      # upload-artifact wraps this in a zip; the release workflow unwraps
+      # it so the pre-packaged file (.exe.zip / .tar.xz / .app.zip) is
+      # what lands on the GitHub Release page.
+      run: |
+        VERSION=${{ steps.version.outputs.version }}
+        NAME="sso-zen-${{ inputs.platform }}-${VERSION}"
+
+        if [ "${{ inputs.platform }}" = "windows" ]; then
+          # fyne package -release produces SSO Zen.exe.zip (signed
+          # when a cert is wired), otherwise just SSO Zen.exe.
+          if [ -f "SSO Zen.exe.zip" ]; then
+            mv "SSO Zen.exe.zip" "${NAME}.exe.zip"
+            ARTIFACT_PATH="${NAME}.exe.zip"
+          elif [ -f "SSO Zen.exe" ]; then
+            mv "SSO Zen.exe" "${NAME}.exe"
+            ARTIFACT_PATH="${NAME}.exe"
+          else
+            echo "Error: Windows build output not found"
+            ls -la
+            exit 1
+          fi
+        elif [ "${{ inputs.platform }}" = "linux" ]; then
+          if [ -f "SSO Zen.tar.xz" ]; then
+            mv "SSO Zen.tar.xz" "${NAME}.tar.xz"
+            ARTIFACT_PATH="${NAME}.tar.xz"
+          elif [ -f "SSO Zen.AppImage" ]; then
+            mv "SSO Zen.AppImage" "${NAME}.AppImage"
+            ARTIFACT_PATH="${NAME}.AppImage"
+          else
+            echo "Error: Linux build output not found"
+            ls -la
+            exit 1
+          fi
+        elif [ "${{ inputs.platform }}" = "darwin" ]; then
+          # .app is a directory; zip it ourselves so the bundle
+          # structure survives (uploading the dir directly would flatten
+          # it to Contents/... and lose the .app wrapper).
+          if [ -d "SSO Zen.app" ]; then
+            zip -r "${NAME}.app.zip" "SSO Zen.app"
+            ARTIFACT_PATH="${NAME}.app.zip"
+          else
+            echo "Error: macOS build output not found"
+            ls -la
+            exit 1
+          fi
+        fi
+
+        echo "artifact-path=$ARTIFACT_PATH" >> $GITHUB_OUTPUT
+        echo "Artifact created: $ARTIFACT_PATH"
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v7
+      with:
+        name: ${{ inputs.platform }}-${{ inputs.release && 'release' || 'build' }}
+        path: ${{ steps.artifact.outputs.artifact-path }}
+        retention-days: ${{ inputs.release && 90 || 7 }}

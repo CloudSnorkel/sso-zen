@@ -1,0 +1,54 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v7
+    - uses: actions/setup-go@v6
+      with:
+        go-version-file: go.mod
+    - name: gofmt
+      run: |
+        unformatted=$(gofmt -l .)
+        if [ -n "$unformatted" ]; then
+          echo "::error::The following files are not gofmt-clean:"
+          echo "$unformatted"
+          echo
+          echo "Run 'gofmt -w .' locally and commit the result."
+          exit 1
+        fi
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v7
+    - uses: actions/setup-go@v6
+      with:
+        go-version-file: go.mod
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libgl1-mesa-dev xorg-dev gcc libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libglfw3-dev
+    - name: go vet
+      run: go vet ./...
+    - name: go test
+      run: go test ./...
+    - name: staticcheck
+      run: go tool staticcheck ./...
+
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [windows, linux, darwin]
+    uses: ./.github/workflows/build-platform.yml
+    with:
+      platform: ${{ matrix.platform }}
+      release: false

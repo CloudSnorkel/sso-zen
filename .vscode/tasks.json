@@ -1,0 +1,75 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "go-build-fyne",
+            "command": "go",
+            "type": "process",
+            "args": [
+                "tool",
+                "fyne-cross",
+                "windows",
+                "-app-id",
+                "com.cloudsnorkel.ssozen"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "go-build-debug",
+            "command": "go",
+            "type": "process",
+            "args": [
+                "build",
+                "-gcflags=all=-N -l",
+                "-o",
+                "${workspaceFolder}/debug/sso-zen-debug.exe",
+                "."
+            ],
+            "group": "build",
+            "options": {
+                "env": {
+                    "CGO_ENABLED": "1"
+                }
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "go-build-no-cgo",
+            "command": "go",
+            "type": "process",
+            "args": [
+                "build",
+                "-gcflags=all=-N -l",
+                "-o",
+                "${workspaceFolder}/debug/sso-zen-no-cgo.exe",
+                "."
+            ],
+            "group": "build",
+            "options": {
+                "env": {
+                    "CGO_ENABLED": "0"
+                }
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+    ]
+}
