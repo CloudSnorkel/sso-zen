@@ -4,6 +4,7 @@ go 1.26.0
 
 require (
 	fyne.io/fyne/v2 v2.7.4
+	fyne.io/systray v1.12.2
 	git.sr.ht/~jackmordaunt/go-toast v1.1.2
 	github.com/fsnotify/fsnotify v1.10.1
 	golang.org/x/sys v0.46.0
@@ -11,7 +12,6 @@ require (
 )
 
 require (
-	fyne.io/systray v1.12.2 // indirect
 	fyne.io/tools v1.7.0 // indirect
 	github.com/BurntSushi/toml v1.6.0 // indirect
 	github.com/akavel/rsrc v0.10.2 // indirect

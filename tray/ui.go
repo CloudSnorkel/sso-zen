@@ -20,6 +20,7 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"fyne.io/systray"
 )
 
 // SessionRefresher is the slice of the session monitor the tray uses
@@ -236,6 +237,7 @@ func (ts *UI) updateSessionsContainer() {
 func (ts *UI) ShowWindow() {
 	fyne.Do(func() {
 		ts.window.Show()
+		restore(ts.window)
 		ts.window.RequestFocus()
 		ts.startUIRefreshTimer()
 	})
@@ -713,7 +715,10 @@ func (ts *UI) setupSystemTray() {
 			}),
 		)
 		desk.SetSystemTrayMenu(menu)
-		desk.SetSystemTrayWindow(ts.window)
+		// Not desk.SetSystemTrayWindow: its tap handler only calls Show, which
+		// doesn't un-minimize the window, and it replaces our close intercept
+		// so the refresh timer never stops.
+		systray.SetOnTapped(ts.ShowWindow)
 	} else {
 		slog.Warn("Desktop features not supported - system tray will not be available")
 	}
