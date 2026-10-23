@@ -61,7 +61,7 @@ func infoButton(title, markdown string) *widget.Button {
 		closeRow := container.NewHBox(layout.NewSpacer(), closeBtn)
 
 		content := container.NewBorder(header, closeRow, nil, nil, container.NewVScroll(body))
-		popup = widget.NewPopUp(content, canvas)
+		popup = widget.NewPopUp(container.NewPadded(content), canvas)
 
 		showCenteredPopup(popup, canvas, 520, 360)
 	}

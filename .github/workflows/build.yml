@@ -35,7 +35,7 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y libgl1-mesa-dev xorg-dev gcc libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libglfw3-dev
+        sudo apt-get install -y libgl1-mesa-dev xorg-dev gcc libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libglfw3-dev libwayland-dev and libxkbcommon-dev
     - name: go vet
       run: go vet ./...
     - name: go test

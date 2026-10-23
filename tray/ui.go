@@ -455,7 +455,7 @@ func (ts *UI) showSessionDetails(session *sso.Session) {
 	// for keyboard / touch users. NewPopUp lands at the canvas origin by
 	// default — ShowAtPosition with manual centering matches the modal
 	// look without the modal lockout.
-	popup = widget.NewPopUp(content, canvas)
+	popup = widget.NewPopUp(container.NewPadded(content), canvas)
 	size := canvas.Size()
 	popupSize := fyne.NewSize(min(size.Width-40, 600), min(size.Height-80, 400))
 	popup.Resize(popupSize)
