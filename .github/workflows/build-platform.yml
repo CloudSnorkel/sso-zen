@@ -44,7 +44,7 @@ jobs:
       if: runner.os == 'Linux'
       run: |
         sudo apt-get update
-        sudo apt-get install -y libgl1-mesa-dev xorg-dev gcc libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libglfw3-dev libxcursor-dev
+        sudo apt-get install -y libgl1-mesa-dev xorg-dev gcc libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libglfw3-dev libxcursor-dev libwayland-dev and libxkbcommon-dev
 
     - name: Extract or set version
       id: version
